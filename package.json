@@ -1,0 +1,18 @@
+{
+  "name": "virtual-world",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Evidence-backed virtual student testing for educational products.",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "test": "node --test",
+    "phase0:check": "node --env-file=.env scripts/phase0-check.mjs",
+    "phase0:inspect": "node --env-file=.env scripts/phase0-inspect.mjs"
+  },
+  "dependencies": {
+    "playwright": "1.65.1"
+  }
+}
