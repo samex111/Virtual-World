@@ -22,7 +22,7 @@ try {
   }
 
   console.log("Synthetic account: " + (config.accountReady
-    ? "marked ready; credential values were not read by this check"
+    ? "marked ready; credential values remain local and were not sent or displayed"
     : "NOT READY — provision an isolated synthetic account and set TEST_ACCOUNT_READY=true"));
   if (!config.accountReady) {
     console.error("\n[INCOMPLETE] Network access is verified, but Phase 0 cannot exit until a synthetic test account is provisioned.");
