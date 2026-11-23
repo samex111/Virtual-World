@@ -1,0 +1,17 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+
+# Dependencies and generated output
+node_modules/
+artifacts/
+playwright-report/
+test-results/
+coverage/
+
+# Local/editor/OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

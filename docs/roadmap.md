@@ -3,16 +3,28 @@
 The roadmap is sequential. Do not start scale or platform abstraction until one journey is reliable and diagnosable.
 
 ## Phase 0 — Product and environment foundation
+
 **Goal:** Make the target and test conditions explicit.
 
-Deliverables: product/architecture docs; dedicated Aceraa test environment and synthetic account; documented login/bootstrap strategy with secrets outside prompts/artifacts; initial Physics scenario and expected outcomes; baseline map of routes, controls, and accessibility/test-ID gaps.
+**Repository status:** the reusable preflight, read-only browser inventory, environment runbook, and initial scenario contract are implemented. Aceraa-specific readiness remains blocked until the approved QA target and synthetic account are provisioned and verified. See [Phase 0 implementation status](implementation/phase-0-foundation.md).
+
+Deliverables:
+- Product/architecture docs and explicit safety boundaries.
+- Test-only environment configuration with exact hostname allowlisting and no secrets in source control.
+- Unauthenticated target reachability check with redirect validation.
+- Read-only Chromium landing-page inventory for routes, controls, accessibility labels, and test-ID coverage.
+- Dedicated synthetic Aceraa account and a documented reset/bootstrap strategy.
+- Initial Physics scenario with subject-reviewed expected outcomes.
 
 Exit criteria:
-- A clean test environment can be identified and safely accessed.
-- No real student personal data or production credentials are needed.
-- The first journey has documented start and completion states.
+- A dedicated test environment is independently confirmed and safely reachable.
+- A synthetic test account is provisioned; no real student personal data or production credentials are needed.
+- The clean reset procedure is documented and verified.
+- The actual target route/control inventory is reviewed, including known accessibility/test-ID gaps.
+- The first journey has documented start/completion states and a subject-reviewed question/answer reference.
 
 ## Phase 1 — Proof of concept: one student, one journey
+
 **Goal:** Prove the complete browser interaction and evidence loop.
 
 Deliverables: one persistent synthetic JEE Main profile; one Chromium browser with Playwright; one Newton's laws Physics scenario; observe → decide → validate → act → verify → record loop; bounded action schema/controller; video, trace, screenshots, event log, run metadata; clean reset/replay procedure.
@@ -33,6 +45,7 @@ Exit criteria:
 - Product quality is not judged solely by student-agent opinion.
 
 ## Phase 2 — Reliable independent evaluation
+
 **Goal:** Detect seeded product defects and classify them correctly.
 
 Deliverables: deterministic UI/workflow assertions; independent conversation and Physics rubric; expected-vs-actual records; student-mistake vs product-defect classification; severity taxonomy; HTML report, PDF summary, ZIP bundle; golden scenarios with seeded defects.
@@ -44,6 +57,7 @@ Exit criteria:
 - Repeated runs are comparable using versioned evaluators.
 
 ## Phase 3 — Student diversity and scenario library
+
 **Goal:** Cover different learner journeys without state leakage.
 
 Deliverables: multiple persistent profiles; topic/difficulty/hint/misconception/follow-up scenarios; profile isolation and state versioning; evidence-backed knowledge updates; coverage reporting.
@@ -54,6 +68,7 @@ Exit criteria:
 - Knowledge updates trace back to observed attempt evidence.
 
 ## Phase 4 — Scale and regression operations
+
 **Goal:** Run controlled suites repeatedly and efficiently.
 
 Deliverables: queue-backed execution and parallel browser workers; concurrency/token/time/retry/storage budgets; artifact lifecycle and retention; scheduled regression suites and replay; run dashboard and trend reporting.
@@ -64,6 +79,7 @@ Exit criteria:
 - Worker crashes and partial runs leave consistent, diagnosable state.
 
 ## Phase 5 — Reusable testing platform
+
 **Goal:** Support additional web products without rewriting the simulator core.
 
 Deliverables: app/environment adapters; reusable workflow/action definitions; test-account and secret-management integration; product knowledge and evaluator configuration; pluggable model/browser/storage/reporting adapters.
@@ -74,4 +90,5 @@ Exit criteria:
 - Product-specific assumptions are isolated and tested.
 
 ## Scope guard
+
 Until Phase 1 exits, do not prioritize multi-student simulation, parallel workers, dashboards, generalized app onboarding, or elaborate agent hierarchies. The hardest risk is proving a trustworthy connection between learner intent, visible UI state, browser action, backend evidence, and independent evaluation.
