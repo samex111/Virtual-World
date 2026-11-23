@@ -1,6 +1,6 @@
 {
   "name": "virtual-world",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Evidence-backed virtual student testing for educational products.",
@@ -10,9 +10,12 @@
   "scripts": {
     "test": "node --test",
     "phase0:check": "node --env-file=.env scripts/phase0-check.mjs",
-    "phase0:inspect": "node --env-file=.env scripts/phase0-inspect.mjs"
+    "phase0:inspect": "node --env-file=.env scripts/phase0-inspect.mjs",
+    "phase1:check": "node --env-file=.env scripts/phase1-check.mjs",
+    "phase1:run": "node --env-file=.env scripts/phase1-run.mjs"
   },
   "dependencies": {
+    "fflate": "0.8.2",
     "playwright": "1.65.1"
   }
 }

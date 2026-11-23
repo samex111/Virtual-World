@@ -1,120 +1,92 @@
 # Phase 1 — Proof of concept
 
-## Objective
+**Implementation status: reusable Phase 1 runtime implemented and unit-tested; the Aceraa end-to-end run remains blocked on target-specific readiness.** Do not mark Phase 1 complete until the exit criteria are demonstrated against the approved Aceraa QA tenant.
 
-Build one reliable end-to-end journey in which a synthetic JEE learner uses the real Aceraa Physics practice interface. The journey must be observable, bounded, replayable, and diagnosable.
+## Objective and journey
 
-The target is not a large simulation population. It is proof that learner intent, browser state, Playwright actions, application behavior, and evidence can be connected without guesswork.
+Build one reliable journey in which a synthetic JEE Main learner uses Aceraa's real Physics practice UI. The learner enters the approved test environment, navigates to Physics, requests a Newton's laws question, reads the question/options, selects and submits one answer, verifies feedback, asks one follow-up, and ends the session with a replayable evidence bundle.
 
-## User journey
+The student may intentionally answer incorrectly. That is valid learner behavior; it is a product defect only if Aceraa mishandles the chosen answer, result, feedback, or follow-up.
 
-1. **Enter Aceraa.** Open the approved test environment and reach the synthetic student's authenticated starting state.
-2. **Navigate to Physics practice.** Use visible navigation and verify the intended practice area is present.
-3. **Request a question.** The learner requests Newton's laws practice at JEE Main level.
-4. **Inspect the rendered question.** Read the visible question and options from accessible DOM/UI data. Use screenshot interpretation only if the question's visual form cannot be understood from the DOM.
-5. **Choose and submit.** Select one option and submit through the actual visible controls.
-6. **Verify feedback.** Confirm the selected state, submission result, correctness indicator, and feedback are rendered.
-7. **Ask a follow-up.** The learner asks why the answer is correct or incorrect. Verify that the response addresses the actual question.
-8. **Finish.** Persist the final session state, close the browser cleanly, and package the run evidence.
+## Implemented runtime
 
-The student may intentionally choose an incorrect answer. That is valid learner behavior. It is a product defect only if Aceraa mishandles the selected answer, result, feedback, or subsequent interaction.
+| Slice | Implementation | Boundary |
+|---|---|---|
+| Browser baseline | One Chromium context, allowlisted HTTP/WebSocket traffic, semantic Playwright locators, unique-target checks, mandatory postconditions | Aceraa selectors/routes are not guessed |
+| Run/event contracts | Correlated simulation/student/session/action IDs, append-only JSONL events, observations, screenshots and checksummed manifest | Backend trace correlation is optional and never fabricated |
+| Persistent learner | Versioned synthetic JEE Physics profile stored as JSON, evidence history and atomic updates | Knowledge changes need approved-answer or reviewed-evaluator provenance |
+| Controlled loop | Separate Student Agent intention and action planner, deterministic validate/act/verify/record orchestration | No provider SDK or model name is hard-coded |
+| Safety/reliability | Action, duration, decision-call and timeout budgets; bounded retries; no-progress detection; ambiguous locator rejection; blocked auth/destructive controls | Browser actions are never retried automatically |
+| Evidence | Redacted event data, Playwright trace sanitization, video, artifact size/path checks, SHA-256 manifest | Run only with a synthetic account in QA |
+| Aceraa journey | Auth, Physics route mapping, reviewed question, feedback/follow-up checkpoints, reset | Still pending QA access and academic sign-off |
 
-## Preconditions to confirm
+## Preconditions
 
-- A dedicated Aceraa test URL and environment are available.
-- A synthetic test account can be created or provisioned safely.
-- Authentication can be performed without placing secrets in prompts or artifacts.
-- The exact navigation route and visible Physics practice controls are known.
-- The initial scenario has an expected answer/reference and acceptable feedback criteria.
-- The team understands what network/backend telemetry can be correlated and what is unavailable.
+- Dedicated Aceraa test URL and isolated tenant are confirmed.
+- Synthetic test account is provisioned and verified.
+- Authentication can be performed without putting secrets in prompts or artifacts.
+- Actual Physics practice route and visible controls are mapped.
+- A Physics owner approves the Newton's laws question, answer key, and explanation criteria.
+- Available backend correlation fields are documented, or marked unavailable.
 
-Do not guess route paths, selectors, account credentials, or backend trace fields. Confirm them against the test environment.
+Do not guess route paths, selectors, credentials, reset steps, or backend trace fields.
 
-## Implementation slices
+## Commands
 
-### Slice A — Deterministic browser baseline
-- Set up Playwright with Chromium.
-- Configure the base URL and test credentials through environment/secret configuration, never committed files.
-- Create one browser journey using accessible locators and explicit postconditions.
-- Enable Playwright trace and browser video.
-- Capture screenshots at the question, answer-selected, feedback, and failure checkpoints.
-- Fail clearly when an expected control or state is absent.
+Requirements: Node.js 22+, installed dependencies, and Chromium.
 
-**Why first:** Verify that the real target product can be exercised before model behavior adds another source of uncertainty.
+~~~bash
+npm install
+npx playwright install chromium
+cp .env.example .env
+# Configure the approved QA URL, exact allowlist, and synthetic account locally.
+npm test
+npm run phase0:check
+npm run phase0:inspect
+npm run phase1:check
+npm run phase1:run
+~~~
 
-### Slice B — Run and evidence contracts
-- Generate simulation_id, student_id, session_id, and action_id.
-- Write append-only event records with timestamps and evidence references.
-- Store scenario/profile version and browser/environment metadata.
-- Create an artifact manifest.
-- Redact sensitive headers and fields from captured evidence.
+`phase1:check` validates the target and local adapter presence; it does not independently prove owner provisioning. `phase1:run` refuses to start unless the account is marked ready, the local adapter authenticates, and the adapter supplies an approved Physics reference.
 
-### Slice C — Persistent synthetic learner
-- Define one structured JEE student profile.
-- Store knowledge state separately from raw conversation.
-- Record answer correctness, topic, difficulty, hint use, confidence, and evidence for any misconception update.
-- Version profile updates and retain provenance.
+## Local Aceraa adapter contract
 
-### Slice D — Student Agent and controlled loop
-- Define a small set of learner intentions.
-- Give the agent the current profile, scenario goal, and latest verified browser observation.
-- Require one structured intention/action proposal at a time.
-- Validate every action and verify the resulting UI state.
-- Add action budgets, retries, timeouts, and no-progress detection.
+The target-specific adapter is deliberately not committed because the authenticated QA UI has not been inspected. Set `PHASE1_ADAPTER_MODULE=./local/aceraa-phase1-adapter.mjs`; `local/` is gitignored.
 
-### Slice E — Reproducible run and failure bundle
-- Run the same scenario repeatedly from a clean test state.
-- Confirm that each action and checkpoint has evidence.
-- Confirm that a failed run preserves enough data to debug.
-- Compare run manifests and scenario/profile versions.
+Export `createAceraaAdapter({ targetConfig, scenarioDefinition })`, returning:
+
+- `authenticate({ page, credentials })`: trusted local QA-account login only. This is outside the model interface.
+- `verifyAuthenticated({ page })`: return true only for a real observed signed-in state.
+- `createScenario({ page, profile, scenarioDefinition })`: return `{ checkpoints, academicReference }`. `checkpoints.isComplete({ profile, observation, history })` checks actual UI state. `academicReference` must include `status: "approved"` and a named `reviewer`.
+- `createStudentAgent({ profile, scenario })`: return an object with `decide(context)` producing one `{ intention, behavior, model? }`. It receives no credentials or browser object.
+- `createActionPlanner({ scenario })`: return an object with `plan(context)` producing one proposal, optionally wrapped as `{ proposal, model }`.
+
+Allowed actions are `click`, `fill`, `check`, `uncheck`, `selectOption`, and a small keyboard-key allowlist. Targets are exact role/name, label, placeholder, test ID, or text. CSS, XPath, coordinates, JavaScript, arbitrary network requests, and shell actions are not accepted. Every action needs an explicit postcondition; ambiguous targets fail closed.
+
+The Student Agent/planner receive a synthetic profile, public scenario, latest redacted DOM-first observation, intention, and history. Credentials are passed only to `authenticate`, then removed from the process environment before agent creation. Tracing starts after authentication. Trace network headers, cookies, query strings, and request/response bodies are redacted before retention.
+
+Knowledge updates returned by `checkpoints.onVerifiedAction` must include a `learningState` patch and provenance with `outcomeSource` equal to `approved_answer_key` or `reviewed_evaluator`, plus an `evidenceRef` belonging to that verified action. A guessed answer or unreviewed UI correctness label cannot become a confirmed misconception.
+
+## Remaining blockers to a real Aceraa run
+
+- [ ] Dedicated isolated QA tenant and exact URL confirmed.
+- [ ] Synthetic JEE account provisioned and independently verified.
+- [ ] Clean reset procedure documented and tested.
+- [ ] Authenticated routes/controls inventoried from the live UI.
+- [ ] Local adapter implemented using observed routes and accessible locators.
+- [ ] Newton's laws question, answer, and explanation approved by a Physics owner.
+- [ ] Backend correlation fields documented or explicitly marked unavailable.
+- [ ] Repeated complete runs from a clean state produce complete evidence bundles.
 
 ## Definition of done
 
-A Phase 1 run is complete only when all of the following are true:
+- [ ] Run starts from a documented clean synthetic state.
+- [ ] Student reaches Physics practice, requests and inspects a Newton's laws question.
+- [ ] Student selects/submits through visible UI, sees feedback, and asks one follow-up.
+- [ ] Every action has input, result, timestamp, and evidence reference.
+- [ ] Video, trace, screenshots, structured events, and manifest are retained.
+- [ ] Action/time/retry/model-call limits are enforced.
+- [ ] Failed runs preserve enough evidence to diagnose.
+- [ ] The journey replays repeatedly from a clean state without hidden manual steps.
 
-- [ ] The scenario starts from a documented clean synthetic test state.
-- [ ] The virtual student reaches the intended Physics practice journey.
-- [ ] The student requests and inspects a Newton's laws question.
-- [ ] The student selects and submits an option through the visible UI.
-- [ ] Aceraa's resulting feedback is observed and recorded.
-- [ ] The learner asks one follow-up and the resulting UI state is verified.
-- [ ] Every browser action has an input, result, timestamp, and evidence reference.
-- [ ] The run captures browser video, Playwright trace, meaningful screenshots, and structured events.
-- [ ] The run is bounded by action, time, retry, and model-call limits.
-- [ ] A failed run includes enough artifacts to reproduce the blocker.
-- [ ] The journey can be replayed from a clean state without hidden manual steps.
-
-Phase 1 does **not** require a production PDF report, multiple student profiles, parallel execution, or a dashboard. Phase 2 owns reliable independent evaluation and report export.
-
-## Expected initial module boundaries
-
-The exact module layout should follow the repository's eventual runtime choice, but keep these responsibilities distinct:
-
-    src/
-      config/             # environment and run configuration
-      profiles/           # structured synthetic learner profiles
-      scenarios/          # initial Physics scenario and checkpoints
-      orchestration/      # journey state machine and budgets
-      browser/            # Playwright controller and action validation
-      models/             # provider-neutral model/vision adapters
-      evidence/           # events, screenshots, traces, manifests
-      evaluation/         # independent evaluators (Phase 2 expansion)
-      reporting/          # run summaries and exports (Phase 2 expansion)
-    tests/
-      unit/
-      integration/
-      scenarios/
-
-This is a conceptual separation, not a requirement to create empty directories immediately. Add modules when a working slice needs them.
-
-## Phase 1 risks
-
-| Risk | Mitigation |
-|---|---|
-| Aceraa UI flow or test access is not ready | Confirm environment and test account before implementing selectors. |
-| Locator ambiguity or responsive UI changes | Prefer roles, labels, and test IDs; reject ambiguous targets. |
-| Model proposes invalid or repeated actions | Strict schema, allowlist, one action per decision, budgets, and loop detection. |
-| Vision endpoint is not image-capable | Verify the exact endpoint or use a separate vision adapter; keep DOM-first behavior. |
-| Backend trace cannot be correlated | Keep UI evidence complete; mark missing backend correlation explicitly. |
-| Synthetic answer is academically ambiguous | Use verified reference data or human review for the initial scenario. |
-| Browser artifacts contain secrets | Redact network data and use dedicated synthetic credentials. |
+Phase 1 does not require a PDF report, multiple learners, parallel execution, or a dashboard; those belong to later phases.

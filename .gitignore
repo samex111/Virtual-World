@@ -3,9 +3,11 @@
 .env.*
 !.env.example
 
-# Dependencies and generated output
+# Dependencies and generated/local output
 node_modules/
+data/
 artifacts/
+local/
 playwright-report/
 test-results/
 coverage/

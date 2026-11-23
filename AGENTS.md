@@ -12,10 +12,12 @@ Read before implementation: [docs/vision.md](docs/vision.md), [docs/problem-stat
 - The student simulates learning; independent evaluators judge the product. The student agent never grades Aceraa.
 - Use observe → decide → validate → act → verify → record. Every next decision uses the newly observed state.
 - Playwright is the actuator. Models propose one constrained action; they never receive unrestricted browser, shell, JavaScript, or network execution.
-- Prefer accessible locators (getByRole, getByLabel, stable test IDs). Coordinate clicks are a documented last resort.
+- Keep the Student Agent's learner intention separate from the action planner's single browser proposal.
+- Prefer accessible locators (getByRole, getByLabel, stable test IDs). Ambiguous targets fail closed.
 - Use DOM/accessibility data first. Invoke vision only when visual layout/content cannot be reliably understood from structured browser data.
 - Keep model providers behind adapters. Never assume a model name implies image input, tool calling, or a particular API schema.
-- Persist student profiles and evidence-backed learning updates as structured, versioned state.
+- Persist synthetic learner profiles and evidence-backed updates as structured, versioned state.
+- Knowledge updates require approved-answer or reviewed-evaluator provenance linked to an action's evidence.
 - Distinguish intentional student mistakes from product defects.
 - Record model IDs, prompt versions, latency, token usage, structured outputs, and errors. Never log private chain-of-thought.
 - Use synthetic accounts and a dedicated test environment. Do not use real student personal data in initial simulations.
@@ -38,6 +40,9 @@ Read before implementation: [docs/vision.md](docs/vision.md), [docs/problem-stat
 - Keep action/event contracts aligned with docs/implementation/action-and-event-contracts.md.
 - Do not claim a phase is complete until its exit criteria are met with reproducible evidence.
 - Until Phase 1 exits, keep scope to one student, one browser, and one Physics journey.
+
+## Phase 1 commands and adapter
+Run `npm test`, then configure the approved QA environment and local adapter before `npm run phase1:check` and `npm run phase1:run`. The target-specific adapter lives in ignored `local/`; do not commit its credentials or guess its selectors. See [Phase 1 runtime contract](docs/implementation/phase-1-poc.md).
 
 ## Definition of done
 Relevant tests pass or the exact reason they could not run is documented; failure paths and safety limits are covered; artifacts are correlated and redacted; docs reflect actual behavior; no secrets or real student data are introduced.

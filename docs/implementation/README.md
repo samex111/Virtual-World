@@ -1,44 +1,16 @@
 # Implementation Rationale — Why We Are Building It This Way
 
-## Why build Virtual-World?
+Virtual-World tests whether Aceraa works for a learner—not merely whether APIs return successful responses. A learner journey crosses intent, question generation, UI rendering, answer selection, submission, feedback, follow-up, and learning-state updates. Failures occur at boundaries between these layers; connected browser and backend evidence makes them diagnosable.
 
-We need to know whether Aceraa works for a learner—not merely whether APIs return successful responses.
+## Key design choices
 
-A learner journey crosses intent, question generation, UI rendering, answer selection, submission, feedback, follow-up, and learning-state updates. Failures often occur at boundaries between these layers. API tests or fixed happy-path scripts may miss them, and disconnected logs make diagnosis expensive.
-
-Virtual-World creates repeatable synthetic learners, runs them through the real product interface, and connects browser observations to available backend/model evidence. The output is a reproducible account of product behavior, not an AI-generated opinion.
-
-## Why synthetic students instead of fixed scripts?
-
-A fixed script checks a known sequence but does not represent differences in knowledge, confidence, misconceptions, or preferences. Persistent profiles let scenarios respond to prior attempts and make the next learner intention depend on the observed journey.
-
-This is controlled variation, not unconstrained autonomy. Scenarios and action budgets preserve reproducibility.
-
-## Why the real UI?
-
-The visible interface is part of the product contract. A valid API response does not prove that a learner can read a question, select an answer, submit it, or understand feedback. Playwright exercises the browser-facing path. Backend events support diagnosis but do not replace UI verification.
-
-## Why separate student and evaluator?
-
-The student agent behaves like a learner. If it also grades the product, the system becomes self-validating. Independent evaluators use deterministic assertions and explicit subject/workflow rubrics. A student may intentionally make mistakes; the evaluator checks whether Aceraa handled them correctly.
-
-## Why Playwright is the actuator?
-
-Models can produce malformed, ambiguous, or unsafe instructions. Playwright provides deterministic locator APIs, timeouts, traces, and assertions. A model proposes one action; policy validates it; Playwright executes it; the runner verifies the resulting state.
-
-## Why DOM-first and vision-on-demand?
-
-Accessibility and DOM data are usually more precise for button names, labels, text, and selected states. Screenshots matter for layout, charts, images, and visual rendering defects, but sending every screen to a vision model adds cost and ambiguity. Use vision only when visual interpretation is actually needed.
-
-## Why one student and one journey first?
-
-A large multi-agent system multiplies moving parts before the basic evidence loop is proven. One synthetic JEE student and one Newton's laws journey validate profile state, orchestration, browser actions, verification, evidence correlation, and failure handling. Add evaluation, profiles, concurrency, and portability only after this loop is repeatable.
-
-## Why evidence bundles?
-
-A useful failure report should answer: What did the student intend? What did the model propose? What did the controller execute? What did the browser display? What did the application return? Which assertion failed? Can another engineer replay it?
-
-Correlated screenshots, video, traces, events, and evaluator output turn vague reports into engineering artifacts.
+- **Synthetic students instead of fixed scripts:** Persistent profiles let scenarios respond to prior attempts, knowledge estimates, confidence, and preferences. Variation stays bounded and replayable.
+- **Real UI:** The visible interface is part of the product contract. Playwright exercises the browser-facing path; backend events support but do not replace UI verification.
+- **Separate student and evaluator:** The student behaves like a learner. Independent evaluators judge Aceraa so the system does not self-validate.
+- **Playwright as actuator:** The Student Agent proposes an intention; a separate planner creates one action; deterministic policy validates; Playwright executes; the runner verifies.
+- **DOM-first perception:** Accessibility/DOM data is usually more precise and cheaper for ordinary controls. Vision is on-demand for visual ambiguity.
+- **One student/one journey first:** One synthetic JEE learner and one Newton's laws journey validate the core loop before multiple agents, profiles, and scale.
+- **Correlated evidence:** The bundle answers what the learner intended, what was proposed, what the controller executed, what the browser displayed, and which assertion failed.
 
 ## Implementation order
 
@@ -61,9 +33,9 @@ Material technical decisions belong in [decisions/](decisions/). Each record sta
 
 ## Implementation tracker
 
-- [Phase 0 — environment foundation](phase-0-foundation.md): preflight tooling and read-only UI inventory are implemented; target-specific environment/account validation remains pending.
-- [Phase 1 — proof of concept](phase-1-poc.md): one synthetic student, one Chromium browser, and one Newton's laws journey.
-- [Action and event contracts](action-and-event-contracts.md): proposed identifiers, constrained actions, event records, and evidence manifest.
+- [Phase 0 — environment foundation](phase-0-foundation.md): reusable preflight and read-only UI inventory implemented; target-specific environment/account validation pending.
+- [Phase 1 — proof of concept](phase-1-poc.md): reusable runtime implemented and unit-tested; Aceraa-specific journey pending QA readiness, live UI mapping, and subject approval.
+- [Action and event contracts](action-and-event-contracts.md): implemented identifiers, constrained actions, event records, and evidence manifest.
 - [Architecture decisions](decisions/README.md): durable technical choices.
 
-Do not mark a phase as implemented until its code exists and its exit criteria have been demonstrated with repeatable evidence.
+Do not mark a phase as complete until its exit criteria have been demonstrated with repeatable evidence.
