@@ -15,13 +15,15 @@ Traditional API tests can prove that endpoints respond while missing broken ques
 - [Product vision](docs/vision.md)
 - [Problem statement](docs/problem-statement.md)
 - [System architecture](docs/architecture.md)
+- [Agent responsibilities](docs/agents.md)
 - [Roadmap and phases](docs/roadmap.md)
-- [Implementation rationale](docs/implementation/README.md)
+- [Implementation rationale and status](docs/implementation/README.md)
+- [Phase 1 implementation ticket](docs/implementation/phase-1-poc.md)
 - [Agent instructions](AGENTS.md)
 
 ## Current status
 
-Documentation foundation / pre-implementation. No simulator, browser runner, model adapter, evaluator, or report pipeline is claimed to exist yet. See the roadmap for phase exit criteria.
+Documentation foundation / pre-implementation. No simulator, browser runner, model adapter, evaluator, or report pipeline is claimed to exist yet. See the roadmap and implementation tracker for phase exit criteria.
 
 ## Core principle
 
