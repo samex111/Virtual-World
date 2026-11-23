@@ -47,3 +47,14 @@ Do not begin with a complex multi-agent hierarchy, autonomous browser computer-u
 
 ## Decision log
 Material technical decisions belong in [decisions/](decisions/). Each record states context, decision, alternatives, consequences, and when to revisit.
+
+## Implementation tracker
+
+The repository is currently at the documentation-foundation stage. The simulator runtime, browser runner, model adapter, evidence collector, evaluators, and report pipeline are not yet implemented.
+
+Use the following documents as the execution contract:
+- [Phase 1 — proof of concept](phase-1-poc.md) defines the first browser journey, implementation slices, preconditions, risks, and definition of done.
+- [Action and event contracts](action-and-event-contracts.md) defines the proposed identifiers, constrained action proposal, event records, and evidence manifest.
+- [Architecture decisions](decisions/README.md) records durable technical choices.
+
+Do not mark a phase as implemented until its code exists and its exit criteria have been demonstrated with repeatable evidence.
